@@ -1,69 +1,105 @@
 body {
   margin: 0;
-  font-family: Arial, sans-serif;
-  background: #0f172a;
+  font-family: 'Segoe UI', sans-serif;
+  background: #0b0f1a;
   color: white;
-  text-align: center;
 }
 
-.container {
-  max-width: 500px;
-  margin: auto;
+/* Layout */
+.app {
+  display: flex;
+  height: 100vh;
+}
+
+/* Sidebar */
+.sidebar {
+  width: 220px;
+  background: linear-gradient(180deg, #6d28d9, #4c1d95);
   padding: 20px;
+  display: flex;
+  flex-direction: column;
 }
 
-h1 {
-  color: #38bdf8;
+.sidebar h2 {
+  margin-bottom: 20px;
 }
 
-.box {
-  margin-top: 20px;
-  padding: 15px;
-  background: #1e293b;
-  border-radius: 10px;
+.sidebar button {
+  background: transparent;
+  border: none;
+  color: white;
+  text-align: left;
+  padding: 10px;
+  margin: 5px 0;
+  cursor: pointer;
+  border-radius: 8px;
+}
+
+.sidebar button:hover {
+  background: rgba(255,255,255,0.1);
+}
+
+/* Main */
+.main {
+  flex: 1;
+  padding: 30px;
+  overflow-y: auto;
+}
+
+/* Cards */
+.card {
+  background: rgba(255,255,255,0.05);
+  padding: 20px;
+  border-radius: 12px;
+  margin-bottom: 20px;
+  backdrop-filter: blur(10px);
 }
 
 /* Inputs */
 input {
-  width: 80%;
+  width: 100%;
   padding: 10px;
-  margin: 8px 0;
+  margin-top: 8px;
   border-radius: 8px;
   border: none;
   outline: none;
+  background: #1e293b;
+  color: white;
+}
+
+/* Row */
+.row {
+  display: flex;
+  gap: 10px;
+}
+
+.row input {
+  flex: 1;
 }
 
 /* Buttons */
 button {
   padding: 10px 15px;
-  margin-top: 5px;
-  border-radius: 8px;
   border: none;
-  background: #38bdf8;
-  color: black;
-  font-weight: bold;
+  border-radius: 8px;
+  background: linear-gradient(90deg, #7c3aed, #a855f7);
+  color: white;
   cursor: pointer;
 }
 
 button:hover {
-  background: #0ea5e9;
+  opacity: 0.85;
 }
 
 /* History */
 #history {
-  text-align: left;
-  max-height: 250px;
+  max-height: 200px;
   overflow-y: auto;
 }
 
 .item {
-  background: #334155;
-  margin: 5px 0;
+  background: #1e293b;
   padding: 8px;
   border-radius: 6px;
-  font-size: 14px;
-}
-
-a {
-  color: #22c55e;
+  margin: 5px 0;
 }
