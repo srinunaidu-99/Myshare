@@ -6,8 +6,18 @@ function goto(page, el){
   document.querySelectorAll(".nav-item").forEach(n=>n.classList.remove("active"));
   if(el) el.classList.add("active");
 
-  document.getElementById("topbarTitle").innerText = page.toUpperCase();
-}
+ const titles = {
+  home:"MyShare",
+  quickshare:"Quick Share",
+  qrconnect:"QR Connect",
+  vault:"MyVault",
+  profile:"Profile",
+  settings:"Settings",
+  howitworks:"About"
+};
+
+document.getElementById("topbarTitle").innerText =
+titles[page] || page;
 
 // COPY ROOM
 function copyRoom(){
