@@ -231,6 +231,8 @@ window.onload = ()=>{
 
   renderNotes();
 
+  goto("home");
+
 };
 function updateUserUI(){
 
