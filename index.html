@@ -1,52 +1,63 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>MyShare 🚀</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta charset="UTF-8">
+  <title>MyShare</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <!-- CSS -->
   <link rel="stylesheet" href="style.css">
-
-  <!-- Socket.IO -->
   <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
 </head>
 <body>
 
-<div class="container">
+<div class="app">
 
-  <h1>📡 MyShare</h1>
-
-  <!-- ROOM -->
-  <div class="box">
-    <h3>Join Room</h3>
-    <input id="roomCode" placeholder="Enter Room Code"/>
-    <button onclick="joinRoom()">Connect</button>
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <h2>⚡ MyShare</h2>
+    <button>Quick Share</button>
+    <button>QR Connect</button>
+    <button>MyVault</button>
   </div>
 
-  <!-- TEXT -->
-  <div class="box">
-    <h3>Send Text</h3>
-    <input id="msgInput" placeholder="Type message"/>
-    <button onclick="sendText()">Send</button>
-  </div>
+  <!-- MAIN -->
+  <div class="main">
 
-  <!-- FILE -->
-  <div class="box">
-    <h3>Send File</h3>
-    <input type="file" onchange="handleFile(event)"/>
-    <button onclick="sendFile()">Upload</button>
-  </div>
+    <h2>Quick Share</h2>
 
-  <!-- HISTORY -->
-  <div class="box">
-    <h3>History</h3>
-    <div id="history"></div>
+    <!-- ROOM -->
+    <div class="card">
+      <label>Room Code</label>
+      <div class="row">
+        <input id="roomCode" placeholder="Enter Code">
+        <button onclick="joinRoom()">Join</button>
+      </div>
+    </div>
+
+    <!-- MESSAGE -->
+    <div class="card">
+      <label>Message</label>
+      <input id="msgInput" placeholder="Type message">
+      <button onclick="sendText()">Send</button>
+    </div>
+
+    <!-- FILE -->
+    <div class="card">
+      <label>Send File</label>
+      <input type="file" onchange="handleFile(event)">
+      <button onclick="sendFile()">Upload</button>
+    </div>
+
+    <!-- HISTORY -->
+    <div class="card">
+      <label>History</label>
+      <div id="history"></div>
+    </div>
+
   </div>
 
 </div>
 
-<!-- JS -->
 <script src="app.js"></script>
 
 </body>
