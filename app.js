@@ -1,125 +1,93 @@
-// ================= CONFIG =================
-const BACKEND_URL = "https://your-backend-url.onrender.com";
-const socket = io(BACKEND_URL);
+// PAGE SWITCH
+function goto(page, el){
+  document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
+  document.getElementById("page-"+page).classList.add("active");
 
-let currentRoom = "";
-let selectedFile = null;
+  document.querySelectorAll(".nav-item").forEach(n=>n.classList.remove("active"));
+  if(el) el.classList.add("active");
 
-// ================= UTIL =================
-function now() {
-  return new Date().toLocaleTimeString();
+  document.getElementById("topbarTitle").innerText = page.toUpperCase();
 }
 
-function toast(msg) {
-  alert(msg);
+// COPY ROOM
+function copyRoom(){
+  const val = document.getElementById("roomCode").value;
+  navigator.clipboard.writeText(val);
+  toast("Room code copied!");
 }
 
-// ================= ROOM =================
-function joinRoom() {
-  const code = document.getElementById("roomCode").value.trim().toUpperCase();
-
-  if (!code) {
-    toast("Enter room code");
-    return;
-  }
-
-  currentRoom = code;
-  socket.emit("joinRoom", code);
-
-  toast("Connected to room " + code);
+// TOAST
+function toast(msg){
+  const t = document.createElement("div");
+  t.innerText = msg;
+  t.style.background="#333";
+  t.style.padding="10px";
+  t.style.margin="5px";
+  document.getElementById("toastArea").appendChild(t);
+  setTimeout(()=>t.remove(),2000);
 }
 
-// ================= TEXT =================
-function sendText() {
-  const input = document.getElementById("msgInput");
-  const msg = input.value.trim();
+// SEND TEXT
+function sendText(){
+  const msg = document.getElementById("msgInput").value;
+  if(!msg) return;
 
-  if (!msg) return;
-
-  socket.emit("sendText", {
-    room: currentRoom,
-    message: msg
-  });
-
-  addHistory("text", msg, now());
-  input.value = "";
+  addHistory("Text", msg);
+  document.getElementById("msgInput").value="";
 }
 
-// Receive text
-socket.on("receiveText", (msg) => {
-  addHistory("text", msg, now());
-});
+// FILE
+let selectedFile=null;
 
-// ================= FILE =================
-function handleFile(e) {
-  selectedFile = e.target.files[0];
+function selectFile(input){
+  selectedFile = input.files[0];
+  document.getElementById("fileLabel").innerText = selectedFile.name;
 }
 
-async function sendFile() {
-  if (!selectedFile) {
-    toast("Select file first");
-    return;
-  }
-
-  const formData = new FormData();
-  formData.append("file", selectedFile);
-
-  try {
-    const res = await fetch(`${BACKEND_URL}/upload`, {
-      method: "POST",
-      body: formData
-    });
-
-    const data = await res.json();
-
-    socket.emit("sendFile", {
-      room: currentRoom,
-      fileName: data.fileName
-    });
-
-    addHistory("file", selectedFile.name, now());
-    selectedFile = null;
-
-  } catch (err) {
-    console.error(err);
-    toast("Upload failed");
-  }
+function sendFile(){
+  if(!selectedFile) return;
+  addHistory("File", selectedFile.name);
 }
 
-// Receive file
-socket.on("receiveFile", (fileName) => {
-  const link = `${BACKEND_URL}/uploads/${fileName}`;
-
-  addHistory(
-    "file",
-    `<a href="${link}" target="_blank">Download File</a>`,
-    now()
-  );
-});
-
-// ================= HISTORY =================
-function addHistory(type, content, time) {
-  const box = document.getElementById("history");
-
+// HISTORY
+function addHistory(type, content){
   const div = document.createElement("div");
-  div.className = "item";
-
-  if (type === "text") {
-    div.innerHTML = `<b>Text:</b> ${content} <span>${time}</span>`;
-  } else {
-    div.innerHTML = `<b>File:</b> ${content} <span>${time}</span>`;
-  }
-
-  box.prepend(div);
+  div.className="history-item";
+  div.innerHTML = `
+    <span>${type}</span>
+    <span>${content}</span>
+  `;
+  document.getElementById("historyList").appendChild(div);
 }
 
-// ================= QR AUTO JOIN =================
-window.onload = () => {
-  const params = new URLSearchParams(window.location.search);
-  const room = params.get("room");
+// QR GENERATE
+function genRoom(){
+  const code = Math.random().toString(36).substring(2,8).toUpperCase();
+  document.getElementById("roomCode").value = code;
+  document.getElementById("qrRoomCode").innerText = code;
+  document.getElementById("qrPageCode").innerText = code;
 
-  if (room) {
-    document.getElementById("roomCode").value = room;
-    joinRoom();
-  }
+  document.getElementById("qrBox").innerHTML="";
+  new QRCode(document.getElementById("qrBox"), code);
+
+  document.getElementById("qrPageBox").innerHTML="";
+  new QRCode(document.getElementById("qrPageBox"), code);
+}
+
+// JOIN ROOM
+function joinRoom(){
+  toast("Joined room!");
+}
+
+// LOGIN
+function openModal(){
+  document.getElementById("authOverlay").style.display="flex";
+}
+function closeModal(){
+  document.getElementById("authOverlay").style.display="none";
+}
+
+// INIT
+window.onload = ()=>{
+  genRoom();
 };
