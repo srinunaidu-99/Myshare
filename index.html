@@ -1,331 +1,59 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>MyShare</title>
-<link rel="stylesheet" href="style.css"/>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-</head>
-<body>
-<div class="app">
+<!-- SOCKET.IO -->
+<script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
 
-  <!-- SIDEBAR -->
-  <aside class="sidebar">
-    <div class="sidebar-logo">
-      <div class="logo-icon">M</div>
-      <span class="logo-text">MyShare</span>
-    </div>
-    <nav class="sidebar-nav">
-      <button class="nav-item active" onclick="goto('quickshare',this)">
-        <span class="nav-icon">⚡</span> Quick Share
-      </button>
-      <button class="nav-item" onclick="goto('qrconnect',this)">
-        <span class="nav-icon">⊞</span> QR Connect
-      </button>
-      <button class="nav-item" onclick="goto('vault',this)">
-        <span class="nav-icon">🔐</span> MyVault
-      </button>
-      <button class="nav-item" onclick="goto('profile',this)">
-        <span class="nav-icon">👤</span> Profile
-      </button>
-      <button class="nav-item" onclick="goto('settings',this)">
-        <span class="nav-icon">⚙️</span> Settings
-      </button>
-      <button class="nav-item" onclick="goto('howitworks',this)">
-        <span class="nav-icon">ℹ️</span> About
-      </button>
-    </nav>
-    <div class="sidebar-footer">
-      <div class="user-row" id="sidebarUserRow" onclick="goto('profile',null)" style="display:none">
-        <div class="user-ava" id="sidebarAva"></div>
-        <div class="user-info">
-          <div class="user-name" id="sidebarName"></div>
-          <div class="user-email" id="sidebarEmail"></div>
-        </div>
-      </div>
-      <button class="btn btn-outline" id="sidebarLoginBtn" onclick="openModal('login')" style="width:100%;font-size:.82rem;padding:9px">Login / Sign up</button>
-    </div>
-  </aside>
+<script>
+const socket = io("https://myshare-backend.onrender.com"); // 🔥 change if needed
 
-  <!-- MAIN WRAP -->
-  <div class="main-wrap">
+let currentRoom = "ABCD1234";
 
-    <!-- MOBILE TOPBAR -->
-    <div class="mobile-topbar">
-      <div class="mobile-logo">
-        <div class="logo-icon" style="width:28px;height:28px;font-size:.85rem">M</div>
-        MyShare
-      </div>
-      <button class="icon-btn" onclick="openModal('login')" id="mLoginBtn">Login</button>
-    </div>
+// JOIN ROOM
+function joinRoom() {
+  const code = document.getElementById('roomCode').value.trim().toUpperCase();
+  if (!code) return alert("Enter room code");
 
-    <!-- DESKTOP TOPBAR -->
-    <div class="topbar" id="desktopTopbar">
-      <div class="topbar-title" id="topbarTitle">Quick Share</div>
-      <div class="topbar-right">
-        <button class="icon-btn">🌙</button>
-        <div class="topbar-user" onclick="goto('profile',null)" id="topbarUserArea" style="display:none">
-          <div>
-            <div class="topbar-name" id="topbarName"></div>
-            <div class="topbar-email" id="topbarEmail"></div>
-          </div>
-          <div class="topbar-ava" id="topbarAva"></div>
-        </div>
-        <button class="btn btn-outline" id="topbarLoginBtn" onclick="openModal('login')" style="font-size:.8rem;padding:8px 14px">Login</button>
-      </div>
-    </div>
+  currentRoom = code;
 
-    <!-- PAGE: QUICK SHARE -->
-    <div class="page active" id="page-quickshare">
-      <div class="qs-grid">
-        <div>
-          <div class="card" style="margin-bottom:20px">
-            <div class="card-header">
-              <h2>Quick Share</h2>
-              <p>Share text or files with devices in the same room</p>
-            </div>
-            <div class="card-body">
-              <span class="label">Room Code</span>
-              <div class="input-row">
-                <input class="input" id="roomCode" placeholder="e.g. ABCD1234" value="ABCD1234"/>
-                <button class="copy-btn" onclick="copyRoom()">📋</button>
-              </div>
-              <span class="label">Type a message</span>
-              <div class="msg-area">
-                <textarea class="input" id="msgInput" placeholder="Enter text here…"></textarea>
-                <div class="send-col">
-                  <button class="btn btn-purple" onclick="sendText()">✈️ Send</button>
-                </div>
-              </div>
-              <span class="label" style="margin-bottom:6px;display:block">Send a file</span>
-              <div class="file-row">
-                <div class="file-input-wrap" id="fileLabel" onclick="document.getElementById('fileInput').click()">Choose file</div>
-                <input type="file" id="fileInput" style="display:none" onchange="selectFile(this)"/>
-                <button class="btn btn-purple" onclick="sendFile()">Send File</button>
-              </div>
-              <div class="history-title">Chat / Transfer History</div>
-              <div class="history-list" id="historyList">
-                <div class="history-item">
-                  <span class="history-badge badge-text">Text</span>
-                  <span class="history-content">Hello! This is MyShare 🚀</span>
-                  <span class="history-time">10:30 AM</span>
-                </div>
-                <div class="history-item">
-                  <span class="history-badge badge-file">File</span>
-                  <span class="history-content">image.png &nbsp;<span style="color:var(--muted);font-size:.75rem">2.4 MB</span></span>
-                  <span class="history-time">10:31 AM</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        <!-- QR SIDE -->
-        <div>
-          <div class="card">
-            <div class="card-header"><h2>Scan to connect</h2></div>
-            <div class="card-body">
-              <div class="qr-section">
-                <div class="qr-box" id="qrBox"><div style="color:#999;font-size:.75rem;text-align:center">QR Loading…</div></div>
-                <div class="qr-room-code" id="qrRoomCode">ABCD1234</div>
-                <div style="display:flex;gap:8px">
-                  <button class="btn btn-outline" style="flex:1;font-size:.78rem" onclick="genRoom()">🎲 New</button>
-                  <button class="btn btn-purple" style="flex:1;font-size:.78rem" onclick="joinRoom()">Join</button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+  socket.emit("join-room", code);
 
-    <!-- PAGE: QR CONNECT -->
-    <div class="page" id="page-qrconnect">
-      <div class="qr-page-center">
-        <div class="qr-connect-title">QR Connect</div>
-        <div class="qr-connect-sub">Scan QR code to join a room</div>
-        <div class="qr-scanner-frame">
-          <div class="qr-corner tl"></div>
-          <div class="qr-corner tr"></div>
-          <div class="qr-corner bl"></div>
-          <div class="qr-corner br"></div>
-          <div id="qrPageBox" style="width:200px;height:200px;display:flex;align-items:center;justify-content:center"></div>
-        </div>
-        <div class="room-code-display">
-          <label>Room Code</label>
-          <div class="code">
-            <span id="qrPageCode">ABCD1234</span>
-            <button onclick="copyRoom()">📋</button>
-          </div>
-        </div>
-        <div class="qr-note">Make sure both devices are<br>in the same network</div>
-        <button class="btn btn-purple" style="width:100%" onclick="genRoom()">🎲 Generate New Room</button>
-      </div>
-    </div>
+  document.getElementById('qrRoomCode').textContent = code;
+  document.getElementById('qrPageCode').textContent = code;
 
-    <!-- PAGE: VAULT -->
-    <div class="page" id="page-vault">
-      <div class="vault-locked-screen" id="vaultLocked">
-        <div class="vault-3d">🔐</div>
-        <h2>MyVault</h2>
-        <p>Login to save your notes and links securely across all your devices.</p>
-        <button class="btn-google" onclick="openModal('login')">
-          <span style="font-size:1.1rem">G</span> Login with Google
-        </button>
-        <button class="btn btn-purple" style="width:280px" onclick="openModal('login')">Login / Sign up</button>
-      </div>
-      <div class="vault-open" id="vaultOpen">
-        <div class="vault-topbar">
-          <h2 style="font-size:1.1rem;font-weight:700;color:var(--purple-light)">MyVault</h2>
-          <button class="btn btn-purple" style="font-size:.8rem;padding:8px 14px" onclick="openNoteModal()">+ New Note</button>
-        </div>
-        <div class="search-bar">
-          <span style="color:var(--muted)">🔍</span>
-          <input placeholder="Search your notes…" oninput="filterNotes(this.value)"/>
-        </div>
-        <div class="note-list" id="noteList"></div>
-      </div>
-    </div>
+  alert("Joined room: " + code);
+}
 
-    <!-- PAGE: PROFILE -->
-    <div class="page" id="page-profile">
-      <div id="profileLoggedOut" style="text-align:center;padding:48px 0">
-        <div style="font-size:3.5rem;margin-bottom:16px">👤</div>
-        <h2 style="font-size:1.1rem;margin-bottom:8px">Not logged in</h2>
-        <p style="color:var(--muted);font-size:.875rem;margin-bottom:24px">Login to access your profile</p>
-        <button class="btn btn-purple" onclick="openModal('login')">Login / Sign up</button>
-      </div>
-      <div id="profileLoggedIn" style="display:none;max-width:480px;margin:0 auto">
-        <div class="profile-header">
-          <div class="profile-ava" id="profileAva"></div>
-          <div class="profile-name" id="profileName"></div>
-          <div class="profile-email" id="profileEmail"></div>
-        </div>
-        <div class="profile-menu">
-          <div class="profile-item"><div class="profile-item-left"><span class="profile-item-icon">👤</span> Account</div><span class="profile-item-arrow">›</span></div>
-          <div class="profile-item" onclick="goto('vault',null)"><div class="profile-item-left"><span class="profile-item-icon">🔐</span> MyVault</div><span class="profile-item-arrow">›</span></div>
-          <div class="profile-item" onclick="goto('settings',null)"><div class="profile-item-left"><span class="profile-item-icon">⚙️</span> Settings</div><span class="profile-item-arrow">›</span></div>
-          <div class="profile-item logout" onclick="logout()"><div class="profile-item-left" style="color:var(--red)"><span class="profile-item-icon">🚪</span> Logout</div></div>
-        </div>
-      </div>
-    </div>
+// SEND TEXT
+function sendText() {
+  const msg = document.getElementById('msgInput').value.trim();
+  if (!msg) return;
 
-    <!-- PAGE: SETTINGS -->
-    <div class="page" id="page-settings">
-      <div style="max-width:520px">
-        <h2 style="font-size:1.1rem;font-weight:700;margin-bottom:24px">Settings</h2>
-        <div class="settings-section">
-          <h3>Sharing</h3>
-          <div class="setting-item">
-            <div><div class="setting-label">Auto-join room on startup</div><div class="setting-sub">Reconnect to last room</div></div>
-            <div class="toggle on" onclick="this.classList.toggle('on')"></div>
-          </div>
-          <div class="setting-item">
-            <div><div class="setting-label">Show file transfer history</div><div class="setting-sub">Keep local log of transfers</div></div>
-            <div class="toggle on" onclick="this.classList.toggle('on')"></div>
-          </div>
-          <div class="setting-item">
-            <div><div class="setting-label">Confirm before sending</div></div>
-            <div class="toggle" onclick="this.classList.toggle('on')"></div>
-          </div>
-        </div>
-        <div class="settings-section">
-          <h3>Notifications</h3>
-          <div class="setting-item">
-            <div><div class="setting-label">Transfer complete alerts</div></div>
-            <div class="toggle on" onclick="this.classList.toggle('on')"></div>
-          </div>
-          <div class="setting-item">
-            <div><div class="setting-label">New peer joined</div></div>
-            <div class="toggle on" onclick="this.classList.toggle('on')"></div>
-          </div>
-        </div>
-      </div>
-    </div>
+  document.getElementById('msgInput').value = "";
 
-    <!-- PAGE: HOW IT WORKS -->
-    <div class="page" id="page-howitworks">
-      <div class="how-section">
-        <h2 class="how-title">How <span>MyShare</span> Works</h2>
-        <p class="how-sub">Share anything between devices in seconds.</p>
-        <div class="how-steps">
-          <div class="how-step"><div class="step-icon">📱</div><div class="step-label">Open<br>MyShare</div></div>
-          <div class="step-arrow">→</div>
-          <div class="how-step"><div class="step-icon">⊞</div><div class="step-label">Join / Scan<br>QR Code</div></div>
-          <div class="step-arrow">→</div>
-          <div class="how-step"><div class="step-icon">⇌</div><div class="step-label">Share Text<br>or Files</div></div>
-          <div class="step-arrow">→</div>
-          <div class="how-step"><div class="step-icon">🔐</div><div class="step-label">Save in<br>MyVault</div></div>
-        </div>
-        <div class="how-tagline"><p><span>Fast</span> • <span>Secure</span> • <span>Simple</span></p></div>
-        <div class="how-footer-text">Your files. Your control.</div>
-      </div>
-    </div>
+  addMessage("You", msg);
 
-    <!-- BOTTOM NAV (mobile) -->
-    <div class="bottom-nav">
-      <div class="bottom-nav-items">
-        <button class="bnav-item active" onclick="goto('quickshare',null);setActive(this)"><span class="bnav-icon">⚡</span>Share</button>
-        <button class="bnav-item" onclick="goto('qrconnect',null);setActive(this)"><span class="bnav-icon">⊞</span>QR</button>
-        <button class="bnav-item" onclick="goto('vault',null);setActive(this)"><span class="bnav-icon">🔐</span>Vault</button>
-        <button class="bnav-item" onclick="goto('profile',null);setActive(this)"><span class="bnav-icon">👤</span>Profile</button>
-      </div>
-    </div>
+  socket.emit("send-message", {
+    room: currentRoom,
+    message: msg
+  });
+}
 
-  </div><!-- /main-wrap -->
-</div><!-- /app -->
+// RECEIVE TEXT
+socket.on("receive-message", (msg) => {
+  addMessage("Other", msg);
+});
 
-<!-- TOAST -->
-<div class="toast-area" id="toastArea"></div>
+// ADD MESSAGE UI
+function addMessage(type, msg) {
+  const list = document.getElementById("historyList");
 
-<!-- AUTH MODAL -->
-<div class="overlay" id="authOverlay">
-  <div class="modal">
-    <button class="modal-close" onclick="closeModal()">✕</button>
-    <div id="loginForm">
-      <h2>Welcome back 👋</h2>
-      <p>Login to access MyVault and sync across devices.</p>
-      <div class="field"><label>Email</label><input type="email" id="lemail" placeholder="you@example.com"/></div>
-      <div class="field"><label>Password</label><input type="password" id="lpass" placeholder="••••••••"/></div>
-      <div class="modal-actions">
-        <button class="btn btn-purple" onclick="doLogin()" style="width:100%">Login</button>
-        <button class="btn-google" onclick="doGoogleLogin()"><span>G</span> Continue with Google</button>
-      </div>
-      <div style="text-align:center;font-size:.82rem;color:var(--muted);margin-top:12px">
-        No account? <a onclick="switchForm('signup')" style="color:var(--purple-light);cursor:pointer">Sign up free</a>
-      </div>
-    </div>
-    <div id="signupForm" style="display:none">
-      <h2>Create account ✨</h2>
-      <p>Join MyShare — free forever.</p>
-      <div class="field"><label>Name</label><input type="text" id="sname" placeholder="Your name"/></div>
-      <div class="field"><label>Email</label><input type="email" id="semail" placeholder="you@example.com"/></div>
-      <div class="field"><label>Password</label><input type="password" id="spass" placeholder="min 6 chars"/></div>
-      <div class="modal-actions">
-        <button class="btn btn-purple" onclick="doSignup()" style="width:100%">Create Account</button>
-      </div>
-      <div style="text-align:center;font-size:.82rem;color:var(--muted);margin-top:12px">
-        Already have one? <a onclick="switchForm('login')" style="color:var(--purple-light);cursor:pointer">Login</a>
-      </div>
-    </div>
-  </div>
-</div>
+  const div = document.createElement("div");
+  div.className = "history-item";
 
-<!-- NOTE MODAL -->
-<div class="overlay" id="noteOverlay">
-  <div class="modal">
-    <button class="modal-close" onclick="closeNoteModal()">✕</button>
-    <h2 id="noteModalTitle">New Note</h2>
-    <p>Save a note, link, or snippet to MyVault</p>
-    <div class="field"><label>Title</label><input type="text" id="noteTitleInput" placeholder="Note title…"/></div>
-    <div class="field"><label>Content</label><textarea id="noteContentInput" style="width:100%;background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:12px 14px;color:var(--text);font-family:var(--font);font-size:.875rem;outline:none;resize:vertical;min-height:120px" placeholder="Type here…"></textarea></div>
-    <div class="modal-actions" style="margin-top:16px">
-      <button class="btn btn-purple" onclick="saveNote()" style="width:100%">Save to Vault</button>
-      <button class="btn btn-outline" onclick="closeNoteModal()" style="width:100%">Cancel</button>
-    </div>
-  </div>
-</div>
+  div.innerHTML = `
+    <span class="history-badge badge-text">${type}</span>
+    <span class="history-content">${msg}</span>
+    <span class="history-time">${new Date().toLocaleTimeString()}</span>
+  `;
 
-<script src="app.js"></script>
-</body>
-</html>
+  list.appendChild(div);
+}
+</script>
