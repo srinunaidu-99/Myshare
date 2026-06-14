@@ -15,6 +15,47 @@ function copyRoom(){
   navigator.clipboard.writeText(val);
   toast("Room code copied!");
 }
+let notes =
+JSON.parse(localStorage.getItem("notes")) || [];
+
+function openNoteModal(){
+  document.getElementById("noteOverlay").style.display="flex";
+}
+
+function closeNoteModal(){
+  document.getElementById("noteOverlay").style.display="none";
+}
+
+function saveNote(){
+
+  const title =
+  document.getElementById("noteTitleInput").value;
+
+  const content =
+  document.getElementById("noteContentInput").value;
+
+  if(!title){
+    toast("Enter title");
+    return;
+  }
+
+  notes.push({
+    title,
+    content,
+    date:new Date().toLocaleString()
+  });
+
+  localStorage.setItem(
+    "notes",
+    JSON.stringify(notes)
+  );
+
+  renderNotes();
+
+  closeNoteModal();
+
+  toast("Saved");
+}
 
 // TOAST
 function toast(msg){
@@ -25,6 +66,34 @@ function toast(msg){
   t.style.margin="5px";
   document.getElementById("toastArea").appendChild(t);
   setTimeout(()=>t.remove(),2000);
+}
+
+function renderNotes(){
+
+  const list =
+  document.getElementById("noteList");
+
+  if(!list) return;
+
+  list.innerHTML="";
+
+  notes.forEach(note=>{
+
+    const div =
+    document.createElement("div");
+
+    div.className="note-card";
+
+    div.innerHTML=`
+      <h3>${note.title}</h3>
+      <p>${note.content}</p>
+      <small>${note.date}</small>
+    `;
+
+    list.appendChild(div);
+
+  });
+
 }
 
 // SEND TEXT
@@ -78,16 +147,128 @@ function genRoom(){
 function joinRoom(){
   toast("Joined room!");
 }
+// LOGIN / SIGNUP
 
-// LOGIN
-function openModal(){
-  document.getElementById("authOverlay").style.display="flex";
-}
-function closeModal(){
-  document.getElementById("authOverlay").style.display="none";
+function switchForm(type){
+  document.getElementById("loginForm").style.display =
+    type === "login" ? "block" : "none";
+
+  document.getElementById("signupForm").style.display =
+    type === "signup" ? "block" : "none";
 }
 
-// INIT
+function doLogin(){
+
+  const email = document.getElementById("lemail").value;
+
+  if(!email){
+    toast("Enter email");
+    return;
+  }
+
+  const user = {
+    name: email.split("@")[0],
+    email: email
+  };
+
+  localStorage.setItem("user", JSON.stringify(user));
+
+  updateUserUI();
+  closeModal();
+
+  toast("Login Successful");
+}
+
+function doSignup(){
+
+  const name = document.getElementById("sname").value;
+  const email = document.getElementById("semail").value;
+
+  if(!name || !email){
+    toast("Fill all fields");
+    return;
+  }
+
+  const user = { name, email };
+
+  localStorage.setItem("user", JSON.stringify(user));
+
+  updateUserUI();
+
+  closeModal();
+
+  toast("Account Created");
+}
+
+function doGoogleLogin(){
+
+  const user = {
+    name: "Google User",
+    email: "googleuser@gmail.com"
+  };
+
+  localStorage.setItem("user", JSON.stringify(user));
+
+  updateUserUI();
+
+  closeModal();
+
+  toast("Google Login Success");
+}
+
+function logout(){
+
+  localStorage.removeItem("user");
+
+  location.reload();
+}
+
 window.onload = ()=>{
+
   genRoom();
+
+  updateUserUI();
+
+  renderNotes();
+
 };
+function updateUserUI(){
+
+  const user =
+    JSON.parse(localStorage.getItem("user"));
+
+  if(!user) return;
+
+  document.getElementById("profileLoggedOut").style.display="none";
+  document.getElementById("profileLoggedIn").style.display="block";
+
+  document.getElementById("profileName").innerText=user.name;
+  document.getElementById("profileEmail").innerText=user.email;
+
+  document.getElementById("topbarLoginBtn").style.display="none";
+
+}function filterNotes(text){
+
+  const cards =
+  document.querySelectorAll(".note-card");
+
+  cards.forEach(card=>{
+
+    card.style.display =
+      card.innerText
+      .toLowerCase()
+      .includes(text.toLowerCase())
+      ? "block"
+      : "none";
+
+  });
+
+}function setActive(btn){
+
+  document
+  .querySelectorAll(".bnav-item")
+  .forEach(x=>x.classList.remove("active"));
+
+  btn.classList.add("active");
+
+}
