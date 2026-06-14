@@ -1,1 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MyShare</title>
 
+<!-- QR Library -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+<style>
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: linear-gradient(135deg, #0f172a, #1e1b4b);
+    color: white;
+    text-align: center;
+}
+
+.app {
+    padding: 40px;
+}
+
+.logo {
+    font-size: 40px;
+    font-weight: bold;
+}
+
+.tag {
+    color: #a78bfa;
+}
+
+.options {
+    margin-top: 30px;
+}
+
+button {
+    display: block;
+    margin: 15px auto;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 12px;
+    background: #7c3aed;
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+    width: 220px;
+}
+
+button:hover {
+    background: #5b21b6;
+}
+
+#output {
+    margin-top: 30px;
+}
+
+textarea {
+    width: 80%;
+    border-radius: 10px;
+    padding: 10px;
+}
+
+a {
+    color: #22c55e;
+    display: block;
+    margin-top: 10px;
+}
+</style>
+
+</head>
+<body>
+
+<div class="app">
+
+    <div class="logo">MyShare</div>
+    <div class="tag">Share anything instantly</div>
+
+    <div class="options">
+
+        <button onclick="instantShare()">⚡ Instant Share</button>
+
+        <button onclick="generateQR()">📷 QR Connect</button>
+
+        <input type="file" id="fileInput" hidden>
+        <button onclick="uploadFile()">📁 File Transfer</button>
+
+        <button onclick="openVault()">🔒 MyVault</button>
+
+    </div>
+
+    <div id="output"></div>
+
+</div>
+
+<script>
+
+// ⚡ Instant Share
+function instantShare() {
+    if (navigator.share) {
+        navigator.share({
+            title: "MyShare",
+            text: "Sharing from MyShare 🚀",
+            url: window.location.href
+        })
+        .then(() => console.log("Shared"))
+        .catch(err => console.log(err));
+    } else {
+        alert("Sharing not supported in this browser");
+    }
+}
+
+// 📷 QR Code
+function generateQR() {
+    const output = document.getElementById("output");
+    output.innerHTML = "<h3>Scan this QR</h3><div id='qr'></div>";
+
+    new QRCode(document.getElementById("qr"), {
+        text: window.location.href,
+        width: 150,
+        height: 150
+    });
+}
+
+// 📁 File Transfer (Local)
+function uploadFile() {
+    document.getElementById("fileInput").click();
+}
+
+document.getElementById("fileInput").addEventListener("change", function() {
+    const file = this.files[0];
+    const output = document.getElementById("output");
+
+    if (file) {
+        const url = URL.createObjectURL(file);
+
+        output.innerHTML = `
+            <h3>File Ready</h3>
+            <p>${file.name}</p>
+            <a href="${url}" download="${file.name}">⬇ Download File</a>
+        `;
+    }
+});
+
+// 🔒 MyVault
+function openVault() {
+    const output = document.getElementById("output");
+    let saved = localStorage.getItem("vault") || "";
+
+    output.innerHTML = `
+        <h3>MyVault 🔒</h3>
+        <textarea id="vaultText" rows="6">${saved}</textarea><br><br>
+        <button onclick="saveVault()">Save</button>
+    `;
+}
+
+function saveVault() {
+    const text = document.getElementById("vaultText").value;
+    localStorage.setItem("vault", text);
+    alert("Saved 🔒");
+}
+
+</script>
+
+</body>
+</html>
