@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Vault</title>
+<link rel="stylesheet"
+href="style.css">
+</head>
+<body>
+
+<div class="card">
+
+<h1>MyVault</h1>
+
+<input
+id="title"
+placeholder="Title">
+
+<textarea
+id="content">
+</textarea>
+
+<button onclick="saveNote()">
+Save
+</button>
+
+</div>
+
+<script>
+
+async function saveNote(){
+
+const token =
+localStorage.getItem("token");
+
+await fetch(
+"http://localhost:5000/api/vault/save",
+{
+method:"POST",
+headers:{
+"Content-Type":"application/json",
+authorization:token
+},
+body:JSON.stringify({
+title:title.value,
+content:content.value
+})
+});
+
+alert("Saved");
+
+}
+
+</script>
+
+</body>
+</html>
