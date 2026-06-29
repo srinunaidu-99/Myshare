@@ -376,5 +376,46 @@ window.addEventListener('load', () => {
   } else {
     buildQR();
   }
+});// Connect to your deployed server (change localhost to your actual URL when deployed)
+const socket = io("http://localhost:5000"); 
+
+// Join a room (when QR is scanned or code is entered)
+function joinRoom(roomCode) {
+    socket.emit("join-room", roomCode);
+    console.log("Joined room:", roomCode);
+}
+
+// Send a message
+function sendTextMessage(message, roomCode) {
+    socket.emit("send-message", { room: roomCode, text: message });
+}
+
+// Listen for incoming messages
+socket.on("receive-message", (data) => {
+    console.log("Message received:", data.text);
+    // Add your UI logic here to display the message
+    toast("New message: " + data.text, "ok");
+});
+
+// File sending logic (convert file to Base64 to send over socket)
+function sendFile(file, roomCode) {
+    const reader = new FileReader();
+    reader.onload = () => {
+        socket.emit("send-file", { 
+            room: roomCode, 
+            fileName: file.name, 
+            fileData: reader.result 
+        });
+    };
+    reader.readAsDataURL(file);
+}
+
+socket.on("receive-file", (data) => {
+    // Logic to create a download link for the received file
+    console.log("File received:", data.fileName);
+    const link = document.createElement("a");
+    link.href = data.fileData;
+    link.download = data.fileName;
+    link.click();
 });
 
