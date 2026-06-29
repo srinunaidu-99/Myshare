@@ -1,40 +1,29 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MyShare Pro</title>
-
-<link rel="stylesheet" href="style.css">
-
-<!-- QR -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-
+  <meta charset="UTF-8">
+  <title>MyShare</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<div class="app">
+<h1 class="logo">🚀 MyShare</h1>
 
-    <h1 class="logo">🚀 MyShare</h1>
-    <p class="tag">Share anything instantly</p>
+<div class="container">
+  
+  <textarea id="textInput" placeholder="Type something to share..."></textarea>
 
-    <div class="card">
+  <div class="buttons">
+    <button onclick="shareText()">⚡ Instant Share</button>
+    <button onclick="generateQR()">📷 QR Generate</button>
+  </div>
 
-        <textarea id="textData" placeholder="Type something to share..."></textarea>
-
-        <button onclick="shareText()">⚡ Instant Share</button>
-
-        <button onclick="generateQR()">📷 QR Generate</button>
-
-        <input type="file" id="fileInput" hidden>
-        <button onclick="triggerFile()">📁 File Transfer</button>
-
-    </div>
-
-    <div id="output"></div>
+  <div id="output"></div>
+  <canvas id="qrCanvas"></canvas>
 
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
 <script src="app.js"></script>
 
 </body>
