@@ -1,69 +1,27 @@
-const output = document.getElementById("output");
-
-// TEXT SHARE
 function shareText() {
-    const text = document.getElementById("textData").value;
+  const text = document.getElementById("textInput").value;
+  const output = document.getElementById("output");
 
-    if (!text) {
-        showToast("Enter something first 😅");
-        return;
-    }
+  if (text.trim() === "") {
+    alert("Enter something!");
+    return;
+  }
 
-    output.innerHTML = `
-        <div class="result">
-            <h3>Shared Data</h3>
-            <p>${text}</p>
-        </div>
-    `;
+  output.style.display = "block";
+  output.innerText = text;
 }
 
-// QR GENERATE
 function generateQR() {
-    const text = document.getElementById("textData").value;
+  const text = document.getElementById("textInput").value;
 
-    if (!text) {
-        showToast("Enter text first!");
-        return;
-    }
+  if (text.trim() === "") {
+    alert("Enter text for QR!");
+    return;
+  }
 
-    output.innerHTML = `<div id="qrBox" class="qr-animate"></div>`;
+  const canvas = document.getElementById("qrCanvas");
 
-    new QRCode(document.getElementById("qrBox"), {
-        text: text,
-        width: 180,
-        height: 180
-    });
-}
-
-// FILE
-function triggerFile() {
-    document.getElementById("fileInput").click();
-}
-
-document.getElementById("fileInput").addEventListener("change", function () {
-    const file = this.files[0];
-
-    if (!file) return;
-
-    const url = URL.createObjectURL(file);
-
-    output.innerHTML = `
-        <div class="result">
-            <h3>${file.name}</h3>
-            <a href="${url}" download>⬇ Download File</a>
-        </div>
-    `;
-});
-
-// TOAST
-function showToast(msg) {
-    const toast = document.createElement("div");
-    toast.className = "toast";
-    toast.innerText = msg;
-
-    document.body.appendChild(toast);
-
-    setTimeout(() => {
-        toast.remove();
-    }, 2000);
+  QRCode.toCanvas(canvas, text, function (error) {
+    if (error) console.error(error);
+  });
 }
